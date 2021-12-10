@@ -15,6 +15,11 @@ from torchvision import transforms as F
 from threading import Thread
 from pykeyboard import PyKeyboard
 from keyboard import *
+import KeyboardEmulation as k
+import pywinio
+import win32api
+import win32con
+from Focus import Focus
 
 # label to key dict
 Dict = {
@@ -82,6 +87,7 @@ class DriveNet(nn.Module):
         return out
 
 class PredThread(Thread):
+    """预测线程"""
     def __init__(self, net):
         super(PredThread, self).__init__()
         self.DoRun = True
@@ -102,8 +108,12 @@ class PredThread(Thread):
             pred = torch.argmax(output, 1)
             press = Dict[pred.item()]
             self.press = press
-    
+
     def GetPress(self):
+        """
+        取出预测的按键值
+        :return:
+        """
         return self.press
 
     def Stop(self):
@@ -119,31 +129,75 @@ def process_each_pic(img):
     output_img.paste(img, box)
     return output_img
 
+class KeyThread(Thread):
+    """按键线程"""
+    CodeDic = {
+        'W': 0x11,
+        'A': 0x1e,
+        'F': 0x1f,
+        'D': 0x20
+    }
+
+    def __init__(self):
+        super(KeyThread, self).__init__()
+        self.ScanCode = []
+        self.DoRun = True
+
+    def run(self) -> None:
+        """run"""
+        while self.DoRun:
+            if self.ScanCode:
+                for c in self.ScanCode:
+                    k.key_down(c)
+
+    def ChangeKey(self, key):
+        """
+        :param key: the list of the pressing key, e.g. 'WA'
+        :return: None
+        """
+        self.ScanCode = []
+        for _k in key:
+            self.ScanCode.append(self.CodeDic[_k])
+
+    def Stop(self):
+        self.DoRun = False
+
 
 if __name__ == "__main__":
     net = torch.load("./net0.pkl", map_location=torch.device('cpu'))
     # screen shoot and predict
     PThread = PredThread(net)
+    KThread = KeyThread()
 
-    k = PyKeyboard()
-    current = ''
-    # press P to start
+    # k = PyKeyboard()
+
+    # press b to start
     while True:
-        if is_pressed('p'):
+        if is_pressed('b'):
             break
+    '''example:
+    while True:
+        # 无敌！！！！！！！！！！！！！！！！！！！！！！！！！！
+        k.key_down(0x1e)   # w
+        k.key_down(0x11)
+        if is_pressed('e'):
+            break
+    '''
 
     PThread.start()
-    # press O to stop
+    KThread.start()
+    # press E to stop
+    current = ''
     while True:
         temp = PThread.GetPress()
+        # print(temp)
+        # temp = 'W'
         if temp != current:
-            for ch in current:
-                k.release_key(ch)
-            for ch in temp:
-                k.press_keys(ch)
+            # 更改当前按键
+            KThread.ChangeKey(temp)
             current = temp
-        print(temp)
-        if is_pressed('o'):
+        if is_pressed('e'):
             print('end')
+            KThread.Stop()
             PThread.Stop()
             break
