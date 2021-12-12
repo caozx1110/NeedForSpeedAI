@@ -36,4 +36,3 @@ the AI to drive the car in the game Need For Speed
         sh ./to_dataset.sh [JSON_FOLDER_NAME] [OUT_FOLDER_NAME]
     ```
 
-test
