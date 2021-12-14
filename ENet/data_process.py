@@ -54,7 +54,7 @@ def split_dataset(root, train_path, test_path, val_path, test_ratio, val_ratio):
 
 extract_data('dataset', img_folder='root', label_folder='root_ann')
 
-split_dataset('root', 'nfs/train', 'nfs/test', 'nfs/val', .1, .1)
+split_dataset('root', 'nfs/train', 'nfs/test', 'nfs/val', .15, .15)
 
 
 img = Image.open('nfs/train_ann/A1.png')
