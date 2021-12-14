@@ -32,24 +32,27 @@ def get_arguments():
         "--batch-size",
         "-b",
         type=int,
-        default=10,
-        help="The batch size. Default: 10")
+        default=8,
+        help="The batch size. Default: 8"
+    )
     parser.add_argument(
         "--epochs",
         type=int,
         default=300,
-        help="Number of training epochs. Default: 300")
+        help="Number of training epochs. Default: 300"
+    )
     parser.add_argument(
         "--learning-rate",
         "-lr",
         type=float,
         default=5e-4,
-        help="The learning rate. Default: 5e-4")
+        help="The learning rate. Default: 5e-4"
+    )
     parser.add_argument(
         "--lr-decay",
         type=float,
         default=.1,
-        help="The learning rate decay factor. Default: 0.1"
+        help="The learning rate decay factor. Default: .1"
     )
     parser.add_argument(
         "--lr-decay-epochs",
@@ -130,8 +133,8 @@ def get_arguments():
     parser.add_argument(
         "--name",
         type=str,
-        default='ENet',
-        help="Name given to the model when saving. Default: ENet"
+        default='nfs_enet',
+        help="Name given to the model when saving. Default: nfs_enet"
     )
     parser.add_argument(
         "--save-dir",

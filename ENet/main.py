@@ -1,22 +1,20 @@
 import os
-
 import torch
 import torch.nn as nn
+from PIL import Image
 import torch.optim as optim
-import torch.optim.lr_scheduler as lr_scheduler
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
+import torch.optim.lr_scheduler as lr_scheduler
 
-from PIL import Image
-
-import transforms as ext_transforms
-from models.enet import ENet
-from train import Train
-from test import Test
-from metric.iou import IoU
-from args import get_arguments
-from data.utils import enet_weighing
 import utils
+from test import Test
+from train import Train
+from metric.iou import IoU
+from models.enet import ENet
+from args import get_arguments
+import transforms as ext_transforms
+from data.utils import enet_weighing
 
 
 args = get_arguments()
@@ -70,26 +68,23 @@ def load_dataset(dataset):
                              shuffle=False, num_workers=args.workers)
 
     # step 3
-    class_encoding = train_set.color_encoding
-    if args.dataset.lower() == 'camvid':
-        del class_encoding['road_marking']
-    num_classes = len(class_encoding)
+    color_code = train_set.color_encoding
+    num_class = len(color_code)
 
     # Print important information and show for debugging.
-    print("Number of classes to predict:", num_classes)
+    print("Number of classes to predict:", num_class)
     print("Train dataset size:", len(train_set))
     print("Validation dataset size:", len(val_set))
     images, labels = iter(test_loader).next() if args.mode.lower() == 'test' \
         else iter(train_loader).next()
     print("Image size:", images.size())
     print("Label size:", labels.size())
-    print("Class-color dictionary:", class_encoding)
+    print("Class-color dictionary:", color_code)
 
-    # Show a batch of samples and labels
     if args.imshow_batch:
         print("Close the figure window to continue...")
         label_to_rgb = transforms.Compose([
-            ext_transforms.LongTensorToRGBPIL(class_encoding),
+            ext_transforms.LongTensorToRGBPIL(color_code),
             transforms.ToTensor()
         ])
         color_labels = utils.batch_transform(labels, label_to_rgb)
@@ -98,25 +93,25 @@ def load_dataset(dataset):
     # Step 4
     print("\nWeighing technique:", args.weighing)
     print("Computing class weights...")
-    print("(this can take a while depending on the dataset size)")
+    print("This can take a while depending on the dataset size")
     if args.weighing.lower() == 'enet':
-        class_weights = enet_weighing(train_loader, num_classes)
+        class_weights = enet_weighing(train_loader, num_class)
     else:
         class_weights = None
     if class_weights is not None:
         # Convert weight to ``FloatTensor`` type and send it to the device.
         class_weights = torch.from_numpy(class_weights).float().to(device)
         if args.ignore_unlabeled:
-            ignore_index = list(class_encoding).index('unlabeled')
+            ignore_index = list(color_code).index('unlabeled')
             class_weights[ignore_index] = 0
     print("Class weights:", class_weights)
 
-    return (train_loader, val_loader, test_loader), class_weights, class_encoding
+    return (train_loader, val_loader, test_loader), class_weights, color_code
 
 
 def train(train_loader, val_loader, class_weights, class_encoding):
     """
-    Using the class ``train`` to preform training.
+    Use the class ``train`` to preform training.
     The loss function is CrossEntropy, ENet uses it to do fit the labels.
     The optimizer is adam, which is the same as that the authors of ENet choose.
     The metric is IoU and confusion matrix.
