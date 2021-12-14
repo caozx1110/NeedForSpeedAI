@@ -10,30 +10,27 @@ class PILToLongTensor:
     Convert a ``PIL Image`` to a ``torch.LongTensor``.
     """
 
-    def __call__(self, pic):
+    def __call__(self, img):
         """
         Perform the conversion from a ``PIL Image`` to a ``torch.LongTensor``.
-        Keyword arguments:
-        - pic (``PIL.Image``): the image to convert to ``torch.LongTensor``
-        Returns:
-        A ``torch.LongTensor``.
+        Return a ``LongTensor`` object.
         """
-        if not isinstance(pic, Image.Image):
+        if not isinstance(img, Image.Image):
             raise TypeError("pic should be PIL Image. Got {}".format(
-                type(pic)))
+                type(img)))
 
         # handle numpy array
-        if isinstance(pic, np.ndarray):
-            img = torch.from_numpy(pic.transpose((2, 0, 1)))
+        if isinstance(img, np.ndarray):
+            img = torch.from_numpy(img.transpose((2, 0, 1)))
             # backward compatibility
             return img.long()
 
         # Convert PIL image to ByteTensor
-        img = torch.ByteTensor(torch.ByteStorage.from_buffer(pic.tobytes()))
+        img = torch.ByteTensor(torch.ByteStorage.from_buffer(img.tobytes()))
 
         # Reshape tensor
-        chn = len(pic.mode)
-        img = img.view(pic.size[1], pic.size[0], chn)
+        chn = len(img.mode)
+        img = img.view(img.size[1], img.size[0], chn)
 
         # Convert to long and squeeze the channels
         return img.transpose(0, 1).transpose(0, 2).contiguous().long().squeeze_()

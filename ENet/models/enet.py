@@ -27,13 +27,9 @@ class InitialBlock(nn.Module):
 
     """
 
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 bias=False,
-                 relu=True):
+    def __init__(self, in_channels, out_channels, bias=False, relu=True):
         super().__init__()
-
+        # Choose the activation function
         if relu:
             activation = nn.ReLU
         else:

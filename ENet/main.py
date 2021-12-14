@@ -152,7 +152,7 @@ def train(train_loader, val_loader, class_weights, class_encoding):
     for epoch in range(start_epoch, args.epochs):
         print("[Epoch: {0}] Training".format(epoch + 1))
 
-        epoch_loss, (iou, miou) = train.run_once(args.print_step)
+        epoch_loss, (iou, miou) = train.run_once(args.print_loss)
         lr_updater.step()
 
         print("[Epoch: {0}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
@@ -161,7 +161,7 @@ def train(train_loader, val_loader, class_weights, class_encoding):
         if (epoch + 1) % 10 == 0 or epoch + 1 == args.epochs:
             print("[Epoch: {0}] Validation".format(epoch))
 
-            loss, (iou, miou) = val.run_once(args.print_step)
+            loss, (iou, miou) = val.run_once(args.print_loss)
 
             print("[Epoch: {0}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
                   format(epoch, loss, miou))
@@ -198,7 +198,7 @@ def test(model, test_loader, class_weights, class_encoding):
 
     print(">>>> Running test dataset")
 
-    loss, (iou, miou) = test.run_once(args.print_step)
+    loss, (iou, miou) = test.run_once(args.print_loss)
 
     print(">>>> Avg. loss: {0:.4f} | Mean IoU: {1:.4f}".format(loss, miou))
 
