@@ -56,7 +56,7 @@ import pyautogui
 
 
 if __name__ == '__main__':
-    folder = './czx2/'
+    folder = './data_raw/mcl1/'
     if not os.path.exists(folder):
         os.makedirs(folder)
 
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     # bt = time.time()
     # print("begin", bt)
     while True:
-        if is_pressed('p'):
+        if is_pressed('b'):
             break
 
     while True:
@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
         if Pushed in Dic.keys():
             # print(Pushed)
-            filename = folder + str(Pushed) + str(Dic[Pushed]) + ".png"
+            filename = folder + str(Pushed) + str(Dic[Pushed]) + ".jpg"
             # 截图
             # window_capture(filename)
             img = pyautogui.screenshot(region=[0, 0, 640, 480])  # x,y,w,h
@@ -96,7 +96,7 @@ if __name__ == '__main__':
             time.sleep(0.05)
             # print(time.time())
 
-        if is_pressed('o'):
+        if is_pressed('e'):
             break
 
         # print(time.asctime(time.localtime(time.time())))
