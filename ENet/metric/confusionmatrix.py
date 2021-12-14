@@ -4,75 +4,63 @@ from metric import metric
 
 
 class ConfusionMatrix(metric.Metric):
-    """Constructs a confusion matrix for a multi-class classification problems.
+    """
+    Constructs a confusion matrix for a multi-class classification problems.
 
-    Does not support multi-label, multi-class problems.
-
-    Keyword arguments:
-    - num_classes (int): number of classes in the classification problem.
-    - normalized (boolean, optional): Determines whether or not the confusion
-    matrix is normalized or not. Default: False.
-
-    Modified from: https://github.com/pytorch/tnt/blob/master/torchnet/meter/confusionmeter.py
+    Parameters:
+        num_classes: number of classes.
+        is_probability: Determines whether the confusion matrix is shown in probability or not.
     """
 
-    def __init__(self, num_classes, normalized=False):
+    def __init__(self, num_classes, is_probability=False):
         super().__init__()
 
         self.conf = np.ndarray((num_classes, num_classes), dtype=np.int64)
-        self.normalized = normalized
+        self.is_probability = is_probability
         self.num_classes = num_classes
         self.reset()
 
     def reset(self):
         self.conf.fill(0)
 
-    def add(self, predicted, target):
-        """Computes the confusion matrix
+    def add(self, pre, gt):
+        """
+        Compute the confusion matrix, shape: (K, K), K = class_num.
 
-        The shape of the confusion matrix is K x K, where K is the number
-        of classes.
-
-        Keyword arguments:
-        - predicted (Tensor or numpy.ndarray): Can be an N x K tensor/array of
-        predicted scores obtained from the model for N examples and K classes,
-        or an N-tensor/array of integer values between 0 and K-1.
-        - target (Tensor or numpy.ndarray): Can be an N x K tensor/array of
-        ground-truth classes for N examples and K classes, or an N-tensor/array
-        of integer values between 0 and K-1.
-
+        The shape of the confusion matrix is K x K, where K is the number of classes.
+        The parameters:
+            pre (Tensor or nd-array):  an N-tensor/array of integer values between 0 and K-1.
+            target (Tensor or nd-array): an N-tensor/array of integer values between 0 and K-1.
         """
         # If target and/or predicted are tensors, convert them to numpy arrays
-        if torch.is_tensor(predicted):
-            predicted = predicted.cpu().numpy()
-        if torch.is_tensor(target):
-            target = target.cpu().numpy()
+        if torch.is_tensor(pre):
+            pre = pre.cpu().numpy()
+        if torch.is_tensor(gt):
+            gt = gt.cpu().numpy()
 
-        assert predicted.shape[0] == target.shape[0], \
-            'number of targets and predicted outputs do not match'
+        assert pre.shape[0] == gt.shape[0], 'number of targets and predicted outputs do not match'
 
-        if np.ndim(predicted) != 1:
-            assert predicted.shape[1] == self.num_classes, \
+        if np.ndim(pre) != 1:
+            assert pre.shape[1] == self.num_classes, \
                 'number of predictions does not match size of confusion matrix'
-            predicted = np.argmax(predicted, 1)
+            pre = np.argmax(pre, 1)
         else:
-            assert (predicted.max() < self.num_classes) and (predicted.min() >= 0), \
+            assert (pre.max() < self.num_classes) and (pre.min() >= 0), \
                 'predicted values are not between 0 and k-1'
 
-        if np.ndim(target) != 1:
-            assert target.shape[1] == self.num_classes, \
-                'Onehot target does not match size of confusion matrix'
-            assert (target >= 0).all() and (target <= 1).all(), \
+        if np.ndim(gt) != 1:
+            assert gt.shape[1] == self.num_classes, \
+                'one hot target does not match size of confusion matrix'
+            assert (gt >= 0).all() and (gt <= 1).all(), \
                 'in one-hot encoding, target values should be 0 or 1'
-            assert (target.sum(1) == 1).all(), \
-                'multi-label setting is not supported'
-            target = np.argmax(target, 1)
+            assert (gt.sum(1) == 1).all(), 'multi-label setting is not supported'
+            gt = np.argmax(gt, 1)
         else:
-            assert (target.max() < self.num_classes) and (target.min() >= 0), \
+            assert (gt.max() < self.num_classes) and (gt.min() >= 0), \
                 'target values are not between 0 and k-1'
 
-        # hack for bincounting 2 arrays together
-        x = predicted + self.num_classes * target
+        # hack for bincount 2 arrays together
+        x = pre + self.num_classes * gt
         bincount_2d = np.bincount(
             x.astype(np.int64), minlength=self.num_classes**2)
         assert bincount_2d.size == self.num_classes**2
@@ -83,12 +71,13 @@ class ConfusionMatrix(metric.Metric):
     def value(self):
         """
         Returns:
-            Confustion matrix of K rows and K columns, where rows corresponds
-            to ground-truth targets and columns corresponds to predicted
-            targets.
+            Confusion matrix of K rows and K columns, K is the class numbers.
+            Rows corresponds to ground-truth targets.
+            Columns corresponds to predicted targets.
         """
-        if self.normalized:
+        if self.is_probability:
             conf = self.conf.astype(np.float32)
+            # clip a small number to prevent the values from being too small
             return conf / conf.sum(1).clip(min=1e-12)[:, None]
         else:
             return self.conf

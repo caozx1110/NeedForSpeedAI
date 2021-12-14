@@ -3,7 +3,8 @@ import torch
 
 
 class InitialBlock(nn.Module):
-    """The initial block is composed of two branches:
+    """
+    The initial block is composed of two branches:
     1. a main branch which performs a regular convolution with stride 2;
     2. an extension branch which performs max-pooling.
 
@@ -72,7 +73,8 @@ class InitialBlock(nn.Module):
 
 
 class RegularBottleneck(nn.Module):
-    """Regular bottlenecks are the main building block of ENet.
+    """
+    Regular bottlenecks are the main building block of ENet.
     Main branch:
     1. Shortcut connection.
 

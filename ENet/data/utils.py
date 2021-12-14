@@ -4,7 +4,8 @@ from PIL import Image
 
 
 def get_files(folder, name_filter=None, extension_filter=None):
-    """Helper function that returns the list of files in a specified folder
+    """
+    Helper function that returns the list of files in a specified folder
     with a specified extension.
 
     Keyword arguments:
@@ -95,8 +96,7 @@ def enet_weighing(dataloader, num_classes, c=1.02):
         propensity_score = freq_class / total_pixels.
 
     Keyword arguments:
-    - dataloader (``data.Dataloader``): A data loader to iterate over the
-    dataset.
+    - dataloader (``data.Dataloader``): A data loader to iterate over the dataset.
     - num_classes (``int``): The number of classes.
     - c (``int``, optional): AN additional hyper-parameter which restricts
     the interval of values for the weights. Default: 1.02.
@@ -106,10 +106,8 @@ def enet_weighing(dataloader, num_classes, c=1.02):
     total = 0
     for _, label in dataloader:
         label = label.cpu().numpy()
-
         # Flatten label
         flat_label = label.flatten()
-
         # Sum up the number of pixels of each class and the total pixel
         # counts for each label
         class_count += np.bincount(flat_label, minlength=num_classes)
@@ -167,3 +165,4 @@ def median_freq_balancing(dataloader, num_classes):
     med = np.median(freq)
 
     return med / freq
+

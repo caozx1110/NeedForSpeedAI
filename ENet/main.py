@@ -15,7 +15,7 @@ from train import Train
 from test import Test
 from metric.iou import IoU
 from args import get_arguments
-from data.utils import enet_weighing, median_freq_balancing
+from data.utils import enet_weighing
 import utils
 
 
@@ -24,49 +24,66 @@ device = torch.device(args.device)
 
 
 def load_dataset(dataset):
+    """
+    Used to load nfs dataset.
+    The steps are as following:
+        1, Perform data augmentation.
+        2, Initialize train, test, val dataset and create corresponding dataloader.
+        3, Get class number and color dictionary.
+        4, Get the class weight for the criterion.
+    """
     print("\nLoading dataset...\n")
 
     print("Selected dataset:", args.dataset)
     print("Dataset directory:", args.dataset_dir)
     print("Save directory:", args.save_dir)
 
-    # data augmentation
-    image_transform = transforms.Compose(
-        [transforms.Resize((args.height, args.width)),
-         transforms.ToTensor()])
-
-    label_transform = transforms.Compose([
-        transforms.Resize((args.height, args.width), Image.NEAREST),
-        ext_transforms.PILToLongTensor()
+    # step 1
+    train_trans = transforms.Compose([
+        transforms.ColorJitter(brightness=.5, contrast=.5, saturation=.5, hue=.3),
+        transforms.Resize((args.height, args.width)),
+        transforms.ToTensor(),
     ])
 
-    # Get Dataset
-    train_set = dataset(args.dataset_dir, transform=image_transform, label_transform=label_transform)
-    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
-    val_set = dataset(args.dataset_dir, mode='val', transform=image_transform, label_transform=label_transform)
-    val_loader = DataLoader(val_set, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
-    test_set = dataset(args.dataset_dir, mode='test', transform=image_transform, label_transform=label_transform)
-    test_loader = DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.workers)
+    test_trans = transforms.Compose([
+        transforms.Resize((args.height, args.width)),
+        transforms.ToTensor(),
+    ])
 
-    # Get encoding between pixel values in label images and RGB colors
+    label_trans = transforms.Compose([
+        transforms.Resize((args.height, args.width), Image.NEAREST),
+        ext_transforms.PILToLongTensor(),
+    ])
+
+    # step 2
+    train_set = dataset(args.dataset_dir, transform=train_trans,
+                        label_transform=label_trans)
+    train_loader = DataLoader(train_set, batch_size=args.batch_size,
+                              shuffle=True, num_workers=args.workers)
+    val_set = dataset(args.dataset_dir, mode='val', transform=test_trans,
+                      label_transform=label_trans)
+    val_loader = DataLoader(val_set, batch_size=args.batch_size,
+                            shuffle=False, num_workers=args.workers)
+    test_set = dataset(args.dataset_dir, mode='test', transform=test_trans,
+                       label_transform=label_trans)
+    test_loader = DataLoader(test_set, batch_size=args.batch_size,
+                             shuffle=False, num_workers=args.workers)
+
+    # step 3
     class_encoding = train_set.color_encoding
     if args.dataset.lower() == 'camvid':
         del class_encoding['road_marking']
     num_classes = len(class_encoding)
 
-    # Print information for debugging
+    # Print important information and show for debugging.
     print("Number of classes to predict:", num_classes)
     print("Train dataset size:", len(train_set))
     print("Validation dataset size:", len(val_set))
-
-    # Get a batch of samples to display
-    if args.mode.lower() == 'test':
-        images, labels = iter(test_loader).next()
-    else:
-        images, labels = iter(train_loader).next()
+    images, labels = iter(test_loader).next() if args.mode.lower() == 'test' \
+        else iter(train_loader).next()
     print("Image size:", images.size())
     print("Label size:", labels.size())
-    print("Class-color encoding:", class_encoding)
+    print("Class-color dictionary:", class_encoding)
 
     # Show a batch of samples and labels
     if args.imshow_batch:
@@ -78,48 +95,43 @@ def load_dataset(dataset):
         color_labels = utils.batch_transform(labels, label_to_rgb)
         utils.imshow_batch(images, color_labels)
 
-    # Get class weights from the selected weighing technique
+    # Step 4
     print("\nWeighing technique:", args.weighing)
     print("Computing class weights...")
     print("(this can take a while depending on the dataset size)")
     if args.weighing.lower() == 'enet':
         class_weights = enet_weighing(train_loader, num_classes)
-    elif args.weighing.lower() == 'mfb':
-        class_weights = median_freq_balancing(train_loader, num_classes)
     else:
         class_weights = None
-
     if class_weights is not None:
+        # Convert weight to ``FloatTensor`` type and send it to the device.
         class_weights = torch.from_numpy(class_weights).float().to(device)
-        # Set the weight of the unlabeled class to 0
         if args.ignore_unlabeled:
             ignore_index = list(class_encoding).index('unlabeled')
             class_weights[ignore_index] = 0
-
     print("Class weights:", class_weights)
 
     return (train_loader, val_loader, test_loader), class_weights, class_encoding
 
 
 def train(train_loader, val_loader, class_weights, class_encoding):
+    """
+    Using the class ``train`` to preform training.
+    The loss function is CrossEntropy, ENet uses it to do fit the labels.
+    The optimizer is adam, which is the same as that the authors of ENet choose.
+    The metric is IoU and confusion matrix.
+    """
     print("\nTraining...\n")
 
     num_classes = len(class_encoding)
 
     # Initialize ENet
     model = ENet(num_classes).to(device)
-    # Check if the network architecture is correct
+    # Check if the network architecture is correct.
     print(model)
 
-    # We are going to use the CrossEntropyLoss loss function as it's most
-    # frequently used in classification problems with multiple classes which
-    # fits the problem. This criterion  combines LogSoftMax and NLLLoss.
     criterion = nn.CrossEntropyLoss(weight=class_weights)
-
-    # ENet authors used Adam as the optimizer
     optimizer = optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
-
-    # Learning rate decay scheduler
     lr_updater = lr_scheduler.StepLR(optimizer, args.lr_decay_epochs, args.lr_decay)
 
     # Evaluation metric
@@ -136,27 +148,27 @@ def train(train_loader, val_loader, class_weights, class_encoding):
         print("Resuming from model: Start epoch = {0} | Best mean IoU = {1:.4f}".format(start_epoch, best_miou))
     else:
         start_epoch = 0
-        best_miou = 0
+        best_miou = .0
 
     # Start Training
     print()
     train = Train(model, train_loader, optimizer, criterion, metric, device)
     val = Test(model, val_loader, criterion, metric, device)
     for epoch in range(start_epoch, args.epochs):
-        print(">>>> [Epoch: {0}] Training".format(epoch))
+        print("[Epoch: {0}] Training".format(epoch + 1))
 
-        epoch_loss, (iou, miou) = train.run_epoch(args.print_step)
+        epoch_loss, (iou, miou) = train.run_once(args.print_step)
         lr_updater.step()
 
-        print(">>>> [Epoch: {0}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
+        print("[Epoch: {0}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
               format(epoch, epoch_loss, miou))
 
         if (epoch + 1) % 10 == 0 or epoch + 1 == args.epochs:
-            print(">>>> [Epoch: {0}] Validation".format(epoch))
+            print("[Epoch: {0}] Validation".format(epoch))
 
-            loss, (iou, miou) = val.run_epoch(args.print_step)
+            loss, (iou, miou) = val.run_once(args.print_step)
 
-            print(">>>> [Epoch: {0}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
+            print("[Epoch: {0}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
                   format(epoch, loss, miou))
 
             # Print per class IoU on last epoch or if best iou
@@ -168,9 +180,7 @@ def train(train_loader, val_loader, class_weights, class_encoding):
             if miou > best_miou:
                 print("\nBest model thus far. Saving...\n")
                 best_miou = miou
-                utils.save_checkpoint(model, optimizer, epoch + 1, best_miou,
-                                      args)
-
+                utils.save_checkpoint(model, optimizer, epoch + 1, best_miou, args)
     return model
 
 
@@ -179,9 +189,6 @@ def test(model, test_loader, class_weights, class_encoding):
 
     num_classes = len(class_encoding)
 
-    # We are going to use the CrossEntropyLoss loss function as it's most
-    # frequentely used in classification problems with multiple classes which
-    # fits the problem. This criterion  combines LogSoftMax and NLLLoss.
     criterion = nn.CrossEntropyLoss(weight=class_weights)
 
     # Evaluation metric
@@ -196,7 +203,7 @@ def test(model, test_loader, class_weights, class_encoding):
 
     print(">>>> Running test dataset")
 
-    loss, (iou, miou) = test.run_epoch(args.print_step)
+    loss, (iou, miou) = test.run_once(args.print_step)
 
     print(">>>> Avg. loss: {0:.4f} | Mean IoU: {1:.4f}".format(loss, miou))
 
@@ -246,13 +253,11 @@ if __name__ == '__main__':
         from data import CamVid as dataset
     elif args.dataset.lower() == 'cityscapes':
         from data import Cityscapes as dataset
-    # todo: create nfs dataset
     elif args.dataset.lower() == 'nfs':
-        from data import nfs_dataset as dataset
+        from data.nfs_dataset import nfs_seg_dataset as dataset
     else:
         # Should never happen...but just in case it does
-        raise RuntimeError("\"{0}\" is not a supported dataset.".format(
-            args.dataset))
+        raise RuntimeError("\"{0}\" is not a supported dataset.".format(args.dataset))
 
     loaders, w_class, class_encoding = load_dataset(dataset)
     train_loader, val_loader, test_loader = loaders
@@ -271,8 +276,7 @@ if __name__ == '__main__':
         optimizer = optim.Adam(model.parameters())
 
         # Load the previously saved model state to the ENet model
-        model = utils.load_checkpoint(model, optimizer, args.save_dir,
-                                      args.name)[0]
+        model = utils.load_checkpoint(model, optimizer, args.save_dir, args.name)[0]
 
         if args.mode.lower() == 'test':
             print(model)

@@ -1,38 +1,28 @@
+import os
 import torch
 import torchvision
 import numpy as np
 import matplotlib.pyplot as plt
-import os
 
 
 def batch_transform(batch, transform):
-    """Applies a transform to a batch of samples.
-
-    Keyword arguments:
-    - batch (): a batch os samples
-    - transform (callable): A function/transform to apply to ``batch``
-
     """
-
-    # Convert the single channel label to RGB in tensor form
-    # 1. torch.unbind removes the 0-dimension of "labels" and returns a tuple of
-    # all slices along that dimension
-    # 2. the transform is applied to each slice
-    transf_slices = [transform(tensor) for tensor in torch.unbind(batch)]
-
-    return torch.stack(transf_slices)
+    Apply a series of transforms to a batch of samples.
+    Parameters:
+        batch: a batch os samples
+        transform: A function/transform to apply to ``batch``
+    """
+    trans_slices = [transform(tensor) for tensor in torch.unbind(batch)]
+    return torch.stack(trans_slices)
 
 
 def imshow_batch(images, labels):
-    """Displays two grids of images. The top grid displays ``images``
-    and the bottom grid ``labels``
+    """
+    Display two grids of images. The top grid displays ``images`` and the bottom grid ``labels``
 
     Keyword arguments:
-    - images (``Tensor``): a 4D mini-batch tensor of shape
-    (B, C, H, W)
-    - labels (``Tensor``): a 4D mini-batch tensor of shape
-    (B, C, H, W)
-
+    - images: a 4D mini-batch tensor of shape (B, C, H, W)
+    - labels: a 4D mini-batch tensor of shape (B, C, H, W)
     """
 
     # Make a grid with the images and labels and convert it to numpy
@@ -42,22 +32,19 @@ def imshow_batch(images, labels):
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 7))
     ax1.imshow(np.transpose(images, (1, 2, 0)))
     ax2.imshow(np.transpose(labels, (1, 2, 0)))
-
     plt.show()
 
 
 def save_checkpoint(model, optimizer, epoch, miou, args):
-    """Saves the model in a specified directory with a specified name.save
+    """
+    Save the model in a specified directory with a specified name.save
 
-    Keyword arguments:
-    - model (``nn.Module``): The model to save.
-    - optimizer (``torch.optim``): The optimizer state to save.
-    - epoch (``int``): The current epoch for the model.
-    - miou (``float``): The mean IoU obtained by the model.
-    - args (``ArgumentParser``): An instance of ArgumentParser which contains
-    the arguments used to train ``model``. The arguments are written to a text
-    file in ``args.save_dir`` named "``args.name``_args.txt".
-
+    Parameters:
+        optimizer: The optimizer state to save.
+        epoch: The current epoch for the model.
+        miou: The best mean IoU obtained by the model.
+        args: An instance of ArgumentParser which contains the arguments used to train ``model``.
+        The arguments are written to a text file in ``args.save_dir`` named "``args.name``_args.txt".
     """
     name = args.name
     save_dir = args.save_dir
@@ -90,29 +77,25 @@ def save_checkpoint(model, optimizer, epoch, miou, args):
 
 
 def load_checkpoint(model, optimizer, folder_dir, filename):
-    """Saves the model in a specified directory with a specified name.save
+    """
+    Save the model in a specified directory with a specified name.save
 
-    Keyword arguments:
-    - model (``nn.Module``): The stored model state is copied to this model
-    instance.
-    - optimizer (``torch.optim``): The stored optimizer state is copied to this
-    optimizer instance.
-    - folder_dir (``string``): The path to the folder where the saved model
-    state is located.
-    - filename (``string``): The model filename.
+    Parameter:
+        model: The stored model state is copied to this model instance.
+        optimizer: The stored optimizer state is copied to this optimizer instance.
+        folder_dir: The path to the folder where the saved model state is located.
+        filename: The model filename.
 
     Returns:
-    The epoch, mean IoU, ``model``, and ``optimizer`` loaded from the
-    checkpoint.
-
+    The epoch, mean IoU, ``model``, and ``optimizer`` loaded from thecheckpoint.
     """
-    assert os.path.isdir(
-        folder_dir), "The directory \"{0}\" doesn't exist.".format(folder_dir)
+    assert os.path.isdir(folder_dir), \
+        "The directory \"{0}\" doesn't exist.".format(folder_dir)
 
     # Create folder to save model and information
     model_path = os.path.join(folder_dir, filename)
-    assert os.path.isfile(
-        model_path), "The model file \"{0}\" doesn't exist.".format(filename)
+    assert os.path.isfile(model_path), \
+        "The model file \"{0}\" doesn't exist.".format(filename)
 
     # Load the stored model parameters to the model instance
     checkpoint = torch.load(model_path)

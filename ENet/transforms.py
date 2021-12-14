@@ -17,7 +17,6 @@ class PILToLongTensor:
         - pic (``PIL.Image``): the image to convert to ``torch.LongTensor``
         Returns:
         A ``torch.LongTensor``.
-
         """
         if not isinstance(pic, Image.Image):
             raise TypeError("pic should be PIL Image. Got {}".format(
@@ -60,11 +59,9 @@ class LongTensorToRGBPIL(object):
         if not isinstance(self.rgb_encoding, OrderedDict):
             raise TypeError("encoding should be an OrderedDict. Got {}".format(type(self.rgb_encoding)))
 
-        # label_tensor might be an image without a channel dimension, in this
-        # case unsqueeze it
+        # label_tensor might be an image without a channel dimension, in this case unsqueeze it
         if len(tensor.size()) == 2:
             tensor.unsqueeze_(0)
-
         color_tensor = torch.ByteTensor(3, tensor.size(1), tensor.size(2))
 
         for index, (class_name, color) in enumerate(self.rgb_encoding.items()):
@@ -73,5 +70,4 @@ class LongTensorToRGBPIL(object):
             # Fill color_tensor with corresponding colors
             for channel, color_value in enumerate(color):
                 color_tensor[channel].masked_fill_(mask, color_value)
-
         return ToPILImage()(color_tensor)

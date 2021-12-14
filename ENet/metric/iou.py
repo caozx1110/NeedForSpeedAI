@@ -5,26 +5,20 @@ from metric.confusionmatrix import ConfusionMatrix
 
 
 class IoU(metric.Metric):
-    """Computes the intersection over union (IoU) per class and corresponding
-    mean (mIoU).
-
-    Intersection over union (IoU) is a common evaluation metric for semantic
-    segmentation. The predictions are first accumulated in a confusion matrix
-    and the IoU is computed from it as follows:
+    """
+    Computes the intersection over union (IoU) per class and corresponding mean (mIoU).
 
         IoU = true_positive / (true_positive + false_positive + false_negative).
 
-    Keyword arguments:
-    - num_classes (int): number of classes in the classification problem
-    - normalized (boolean, optional): Determines whether or not the confusion
-    matrix is normalized or not. Default: False.
-    - ignore_index (int or iterable, optional): Index of the classes to ignore
-    when computing the IoU. Can be an int, or any iterable of ints.
+    Parameters:
+        num_classes: number of classes in the classification problem
+        is_probability: Determines whether the confusion matrix is shown in probability or not.
+        ignore_index: Index of the classes to ignore when computing the IoU.
     """
 
-    def __init__(self, num_classes, normalized=False, ignore_index=None):
+    def __init__(self, num_classes, is_probability=False, ignore_index=None):
         super().__init__()
-        self.conf_metric = ConfusionMatrix(num_classes, normalized)
+        self.conf_metric = ConfusionMatrix(num_classes, is_probability)
 
         if ignore_index is None:
             self.ignore_index = None
@@ -39,43 +33,29 @@ class IoU(metric.Metric):
     def reset(self):
         self.conf_metric.reset()
 
-    def add(self, predicted, target):
-        """Adds the predicted and target pair to the IoU metric.
-
-        Keyword arguments:
-        - predicted (Tensor): Can be a (N, K, H, W) tensor of
-        predicted scores obtained from the model for N examples and K classes,
-        or (N, H, W) tensor of integer values between 0 and K-1.
-        - target (Tensor): Can be a (N, K, H, W) tensor of
-        target scores for N examples and K classes, or (N, H, W) tensor of
-        integer values between 0 and K-1.
-
+    def add(self, pre, gt):
+        """
+        Add the predicted and target pair to the IoU metric.
+        The parameters:
+            pre: tensor of integer values between 0 and K-1, shape: (N, H, W).
+            gt: tensor of integer values between 0 and K-1. shape: (N, H, W).
         """
         # Dimensions check
-        assert predicted.size(0) == target.size(0), \
-            'number of targets and predicted outputs do not match'
-        assert predicted.dim() == 3 or predicted.dim() == 4, \
-            "predictions must be of dimension (N, H, W) or (N, K, H, W)"
-        assert target.dim() == 3 or target.dim() == 4, \
-            "targets must be of dimension (N, H, W) or (N, K, H, W)"
+        assert pre.size(0) == gt.size(0), 'Number of targets and predicted outputs do not match'
+        assert pre.dim() == 3, 'Predictions must be of dimension (N, H, W)'
+        assert gt.dim() == 3, 'Targets must be of dimension (N, H, W)'
 
-        # If the tensor is in categorical format convert it to integer format
-        if predicted.dim() == 4:
-            _, predicted = predicted.max(1)
-        if target.dim() == 4:
-            _, target = target.max(1)
-
-        self.conf_metric.add(predicted.view(-1), target.view(-1))
+        self.conf_metric.add(pre.view(-1), gt.view(-1))
 
     def value(self):
-        """Computes the IoU and mean IoU.
-
+        """
+        Computes the IoU and mean IoU.
         The mean computation ignores NaN elements of the IoU array.
 
         Returns:
-            Tuple: (IoU, mIoU). The first output is the per class IoU,
-            for K classes it's numpy.ndarray with K elements. The second output,
-            is the mean IoU.
+            Tuple: (IoU, mIoU).
+            The first output is the per class IoU, shape: (K, )
+            The second output is the mean IoU.
         """
         conf_matrix = self.conf_metric.value()
         if self.ignore_index is not None:
