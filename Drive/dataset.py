@@ -5,7 +5,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 
 
-label_dict = {}
+label_dict = {'A': 0, 'D': 1, 'N': 2, 'W': 3, 'WA': 4, 'WD': 5}
 
 
 class nfs_cls_dataset(Dataset):
