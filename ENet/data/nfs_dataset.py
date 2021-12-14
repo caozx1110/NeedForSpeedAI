@@ -1,7 +1,5 @@
 import os
-import re
 from . import utils
-from PIL import Image
 from collections import OrderedDict
 from torch.utils.data import Dataset
 
@@ -92,22 +90,3 @@ class nfs_seg_dataset(Dataset):
         else:
             raise RuntimeError("Unexpected dataset mode. "
                                "Supported modes are: train, val and test")
-
-
-class nfs_cls_dataset(Dataset):
-    """ Used for creating classification data loader """
-    def __init__(self, data_path, input_transform):
-        super(nfs_cls_dataset, self).__init__()
-        self.data_path = data_path
-        self.transform = input_transform
-
-    def __getitem__(self, index):
-        img_name = os.listdir(self.data_path)[index]
-        key = re.findall(r'[a-zA-Z]+', img_name)[0]
-        abs_img_path = os.path.join(self.data_path, img_name)
-        output_data = self.transform(Image.open(abs_img_path))
-        output_label = label_dict[key]
-        return output_data, output_label
-
-    def __len__(self):
-        return len(os.listdir(self.data_path))
