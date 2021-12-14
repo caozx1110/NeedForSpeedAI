@@ -1,5 +1,6 @@
 import os
 import re
+import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset
 
@@ -27,10 +28,11 @@ class nfs_cls_dataset(Dataset):
         self.transform = input_trans
 
     def __getitem__(self, index):
-        img_name = os.listdir(self.data_path)[index]
-        key = re.findall(r'[a-zA-Z]+', img_name)[0]
-        abs_img_path = os.path.join(self.data_path, img_name)
-        output_data = self.transform(Image.open(abs_img_path))
+        lbl_name = os.listdir(self.data_path)[index]
+        key = re.findall(r'[a-zA-Z]+', lbl_name)[0]
+        abs_lbl_path = os.path.join(self.data_path, lbl_name)
+        lbl_img = np.array(Image.open(abs_lbl_path)) / 2
+        output_data = self.transform(lbl_img)
         output_label = label_dict[key]
         return output_data, output_label
 
