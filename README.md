@@ -36,6 +36,8 @@ the AI to drive the car in the game Need For Speed
         sh ./to_dataset.sh [JSON_FOLDER_NAME] [OUT_FOLDER_NAME]
     ```
 
+---
+
 ### Action directory
 
 结合所有的内容：分割，预测，线程操作等。
