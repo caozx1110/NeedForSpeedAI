@@ -9,7 +9,7 @@
 import time
 import torch
 import pyautogui
-from model import DriveNet
+from DriveNet import DriveNet
 from torch import nn
 from PIL import Image
 from torchvision import transforms as F
