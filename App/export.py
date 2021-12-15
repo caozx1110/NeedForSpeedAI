@@ -28,6 +28,20 @@ def alter_predict(model, raw_img, device):
     # Note the output of the tensor has 3 dimensions and the first dimension represents the number of the image.
     return torch.argmax(pre, 1).cpu()
 
+def tensor_predict(model, tensor_img, device):
+    """
+    This API is designed to directly predicted the result.
+
+    the input img is tensor
+    """
+    img = torch.unsqueeze(tensor_img, dim=0).to(device)
+    model.eval()
+    with torch.no_grad():
+        pre = model(img)
+    # Predictions is one-hot encoded with "num_classes" channels.
+    # Convert it by get the index corresponding with the maximum in dim 1.
+    # Note the output of the tensor has 3 dimensions and the first dimension represents the number of the image.
+    return torch.argmax(pre, 1).cpu()
 
 def pre2render(pre, class_encoding):
     """
