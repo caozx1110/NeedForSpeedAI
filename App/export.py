@@ -3,8 +3,8 @@ import torchvision
 import numpy as np
 from torchvision import transforms
 
-import action.utils as utils
-import action.transforms as ext_transforms
+import utils as utils
+import transforms as ext_transforms
 
 
 def alter_predict(model, raw_img, device):

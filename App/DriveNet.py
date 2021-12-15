@@ -47,7 +47,7 @@ from torch import nn
 class DriveNet(nn.Module):
     def __init__(self):
         """
-        This net is used for classification, the input image size is 480 * 640.
+        This model_drive is used for classification, the input image size is 480 * 640.
         """
         super(DriveNet, self).__init__()
         self.cnn = nn.Sequential(
