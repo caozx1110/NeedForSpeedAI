@@ -159,12 +159,12 @@ def train(train_loader, val_loader, class_weights, class_encoding):
               format(epoch, epoch_loss, miou))
 
         if (epoch + 1) % 10 == 0 or epoch + 1 == args.epochs:
-            print("[Epoch: {0}] Validation".format(epoch))
+            print("[Epoch: {0}] Validation".format(epoch + 1))
 
             loss, (iou, miou) = val.run_once(args.print_loss)
 
             print("[Epoch: {0}] Avg. loss: {1:.4f} | Mean IoU: {2:.4f}".
-                  format(epoch, loss, miou))
+                  format(epoch + 1, loss, miou))
 
             # Print per class IoU on last epoch or if best iou
             if epoch + 1 == args.epochs or miou > best_miou:
@@ -266,8 +266,7 @@ if __name__ == '__main__':
             num_classes = len(class_encoding)
             model = ENet(num_classes).to(device)
 
-        # Initialize a optimizer just so we can retrieve the model from the
-        # checkpoint
+        # Initialize a optimizer just so we can retrieve the model from the checkpoint
         optimizer = optim.Adam(model.parameters())
 
         # Load the previously saved model state to the ENet model

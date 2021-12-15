@@ -71,8 +71,8 @@ class vgg_net(nn.Module):
             nn.ReLU(True),
             nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
             # shape: 12 * 16
-            nn.Conv2d(256, 512, kernel_size=(3, 3), stride=(1, 1), padding=1),
-            nn.BatchNorm2d(512),
+            nn.Conv2d(512, 256, kernel_size=(3, 3), stride=(1, 1), padding=1),
+            nn.BatchNorm2d(256),
             nn.ReLU(True),
             nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
             # shape: 6 * 8
@@ -85,8 +85,8 @@ class vgg_net(nn.Module):
 
         self.fc = nn.Sequential(
             nn.Linear(512 * 3 * 4, 512),
-            nn.ReLU(),
-            nn.Linear(512, 9),
+            nn.ReLU(True),
+            nn.Linear(512, 6),
         )
 
     def forward(self, x):

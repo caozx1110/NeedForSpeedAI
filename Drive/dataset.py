@@ -1,6 +1,7 @@
 import os
 import re
 import numpy as np
+import torch
 from PIL import Image
 from torch.utils.data import Dataset
 
@@ -32,7 +33,7 @@ class nfs_cls_dataset(Dataset):
         key = re.findall(r'[a-zA-Z]+', lbl_name)[0]
         abs_lbl_path = os.path.join(self.data_path, lbl_name)
         lbl_img = np.array(Image.open(abs_lbl_path)) / 2
-        output_data = self.transform(lbl_img)
+        output_data = torch.DoubleTensor(lbl_img)
         output_label = label_dict[key]
         return output_data, output_label
 

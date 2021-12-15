@@ -1,18 +1,13 @@
 import torch
 import torchvision
 import numpy as np
-from PIL import Image
-from torch import optim
-import matplotlib.pyplot as plt
 from torchvision import transforms
-from collections import OrderedDict
 
 import utils
-from models.enet import ENet
 import transforms as ext_transforms
 
 
-def alter_predict(model, raw_img):
+def alter_predict(model, raw_img, device):
     """
     This API is designed to directly predicted the result.
     ``raw_img`` is the input image in type 'PIL' or nd-array
@@ -57,22 +52,3 @@ def process_pre(pre, class_encoding):
     pre = torch.true_divide(torch.FloatTensor(torch.unsqueeze(pre, dim=0)), reg_num)
     return pre
 
-
-device = 'cuda'
-
-class_encoding = OrderedDict([
-    ('unlabeled', (0, 0, 0)),
-    ('road', (128, 64, 128)),
-    ('car', (64, 0, 128)),
-])
-
-
-""" Test """
-num_classes = len(class_encoding)
-model = ENet(num_classes).to(device)
-optimizer = optim.Adam(model.parameters())
-model = utils.load_checkpoint(model, optimizer, './save', 'nfs_enet')[0]
-test_img = Image.open('./data/nfs/test/A5.png')
-pre = alter_predict(model, test_img)
-render = pre2render(pre, class_encoding)
-plt.imshow(render)
