@@ -64,5 +64,9 @@ the AI to drive the car in the game Need For Speed
 >+ 启动设置`禁用驱动程序强制签名`时，需要BitLocker恢复密钥，登录[Microsoft](https://account.microsoft.com/devices/recoverykey?refd=support.microsoft.com)查询
 >+ 运行python脚本时，需要以**管理员权限**运行PyCharm或其他
 
+---
 
+### rename.bat脚本的使用
+
+​		用于对同一归属目录下的文件夹统一重命名，在其后加上**_[数字]**，具体数字需编辑更改，慎用
 
