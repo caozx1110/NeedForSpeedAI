@@ -1,0 +1,7 @@
+torch
+keyboard
+matplotlib
+numpy
+Pillow
+PyAutoGUI
+pywinio
