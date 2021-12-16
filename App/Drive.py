@@ -48,7 +48,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 #     8: ''
 # }
 
-Dict = {'A': 0, 'D': 1, 'N': 2, 'W': 3, 'WA': 4, 'WD': 5, 0: 'A', 1: 'D', 2: 'N', 3: 'W', 4: 'WA', 5: 'WD'}
+Dict = {'A': 0, 'D': 1, 'W': 2, 'WA': 3, 'WD': 4, 0: 'A', 1: 'D', 2: 'W', 3: 'WA', 4: 'WD'}
 
 # class PredThread(Thread):
 #     """预测线程"""
@@ -154,7 +154,6 @@ if __name__ == "__main__":
     while True:
         # st = time.time()
         # img = pyautogui.screenshot(region=[0, 0, 640, 480])  # x,y,w,h
-        img = Image.open()
         # img.save('./temp.png')
         # Seg
         img = alter_predict(SegModel, img, DEVICE)
@@ -177,3 +176,36 @@ if __name__ == "__main__":
             break
         # 一个循环用时
         print("time", time.time() - st)
+
+
+import cv2
+import matplotlib.pyplot as plt
+SegModel = ENet(num_classes=3).to(DEVICE)
+checkpoint = torch.load('./save/nfs_enet', map_location=torch.device(DEVICE))
+SegModel.load_state_dict(checkpoint['state_dict'])
+# 分类网络
+
+color_encoding = OrderedDict([
+    ('unlabeled', (0, 0, 0)),
+    ('road', (128, 64, 128)),
+    ('car', (64, 0, 128)),
+])
+ClassModel = torch.load("./save/drive.pth", map_location=torch.device(DEVICE))
+root = '..\\data\\Collect\\data_raw\\czx1'
+img_list = os.listdir(root)
+i = 0
+i = i + 1
+plt.close()
+item = img_list[i]
+img = Image.open(os.path.join(root, item))
+lbl = alter_predict(SegModel, img, DEVICE)
+x = pre2render(lbl, color_encoding)
+plt.subplot(121)
+plt.imshow(img)
+plt.axis('off')
+plt.subplot(122)
+plt.imshow(x)
+plt.axis('off')
+pred = Dict[tensor_predict(ClassModel, lbl / 2, DEVICE).item()]
+print(pred)
+
