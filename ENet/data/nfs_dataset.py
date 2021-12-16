@@ -2,7 +2,7 @@ import os
 import random
 from collections import OrderedDict
 from torch.utils.data import Dataset
-from torchvision.transforms.functional import F
+import torchvision.transforms.functional as F
 
 from . import utils
 
@@ -28,13 +28,15 @@ class nfs_seg_dataset(Dataset):
         ('car', (64, 0, 128)),
     ])
 
-    def __init__(self, root_dir, mode='train', transform=None, label_transform=None, loader=utils.pil_loader):
+    def __init__(self, root_dir, mode='train', transform=None, label_transform=None,
+                 loader=utils.pil_loader, augment_intensity=.5):
         super(nfs_seg_dataset, self).__init__()
         self.root_dir = root_dir
         self.mode = mode
         self.transform = transform
         self.label_transform = label_transform
         self.loader = loader
+        self.augment_intensity = augment_intensity
 
         if self.mode.lower() == 'train':
             self.train_data = utils.get_files(
@@ -96,21 +98,20 @@ class nfs_seg_dataset(Dataset):
             raise RuntimeError("Unexpected dataset mode. "
                                "Supported modes are: train, val and test")
 
-    @staticmethod
-    def data_augmentation(img, lbl):
+    def data_augmentation(self, img, lbl):
         """
         Randomly perform data augmentation:
             Rotate:
 
         """
-        if random.random() > .5:
+        if random.random() > self.augment_intensity:
             angle = random.randint(-30, 30)
             img = F.rotate(img, angle)
             lbl = F.rotate(lbl, angle)
-        if random.random() > .5:
+        if random.random() > self.augment_intensity:
             img = F.hflip(img)
             lbl = F.hflip(lbl)
-        if random.random() > .5:
+        if random.random() > self.augment_intensity:
             img = F.vflip(img)
             lbl = F.vflip(lbl)
         return img, lbl
