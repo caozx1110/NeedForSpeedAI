@@ -483,11 +483,7 @@ class ENet(nn.Module):
 
         # Stage 1 - Encoder
         self.downsample1_0 = DownsamplingBottleneck(
-            16,
-            64,
-            return_indices=True,
-            dropout_prob=0.01,
-            relu=encoder_relu)
+            16, 64, return_indices=True, dropout_prob=0.01, relu=encoder_relu)
         self.regular1_1 = RegularBottleneck(
             64, padding=1, dropout_prob=0.01, relu=encoder_relu)
         self.regular1_2 = RegularBottleneck(
@@ -499,11 +495,7 @@ class ENet(nn.Module):
 
         # Stage 2 - Encoder
         self.downsample2_0 = DownsamplingBottleneck(
-            64,
-            128,
-            return_indices=True,
-            dropout_prob=0.1,
-            relu=encoder_relu)
+            64, 128, return_indices=True, dropout_prob=0.1, relu=encoder_relu)
         self.regular2_1 = RegularBottleneck(
             128, padding=1, dropout_prob=0.1, relu=encoder_relu)
         self.dilated2_2 = RegularBottleneck(
