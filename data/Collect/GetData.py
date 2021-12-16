@@ -56,7 +56,7 @@ import pyautogui
 
 
 if __name__ == '__main__':
-    folder = './data_raw/mcl1/'
+    folder = './data_raw/czx2/'
     if not os.path.exists(folder):
         os.makedirs(folder)
 
