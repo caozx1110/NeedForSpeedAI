@@ -1,7 +1,10 @@
 import os
-from . import utils
+import random
 from collections import OrderedDict
 from torch.utils.data import Dataset
+from torchvision.transforms.functional import F
+
+from . import utils
 
 
 class nfs_seg_dataset(Dataset):
@@ -77,6 +80,8 @@ class nfs_seg_dataset(Dataset):
             img = self.transform(img)
         if self.label_transform is not None:
             label = self.label_transform(label)
+        if self.mode == 'train':
+            img, label = self.data_augmentation(img, label)
         return img, label
 
     def __len__(self):
@@ -90,3 +95,23 @@ class nfs_seg_dataset(Dataset):
         else:
             raise RuntimeError("Unexpected dataset mode. "
                                "Supported modes are: train, val and test")
+
+    @staticmethod
+    def data_augmentation(img, lbl):
+        """
+        Randomly perform data augmentation:
+            Rotate:
+
+        """
+        if random.random() > .5:
+            angle = random.randint(-30, 30)
+            img = F.rotate(img, angle)
+            lbl = F.rotate(lbl, angle)
+        if random.random() > .5:
+            img = F.hflip(img)
+            lbl = F.hflip(lbl)
+        if random.random() > .5:
+            img = F.vflip(img)
+            lbl = F.vflip(lbl)
+        return img, lbl
+

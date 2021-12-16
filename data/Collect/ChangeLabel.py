@@ -29,5 +29,21 @@ if __name__ == '__main__':
             f.close()
 
 
-
+import matplotlib.pyplot as plt
+from PIL import Image
+root = 'dataset\\dataset_mcl'
+json_list = os.listdir(root)
+i = 0
+i += 1
+plt.close()
+path = os.path.join(root, json_list[i])
+print(json_list[i])
+img_path = os.path.join(path, 'img.png')
+lbl_path = os.path.join(path, 'label_viz.png')
+plt.subplot(121)
+plt.imshow(Image.open(img_path))
+plt.axis('off')
+plt.subplot(122)
+plt.imshow(Image.open(lbl_path))
+plt.axis('off')
 
