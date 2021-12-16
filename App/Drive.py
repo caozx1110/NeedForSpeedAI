@@ -105,6 +105,7 @@ class KeyThread(Thread):
             if self.ScanCode:
                 for c in self.ScanCode:
                     k.key_down(c)
+                    time.sleep(0.0001)
 
     def ChangeKey(self, key):
         """
@@ -120,15 +121,16 @@ class KeyThread(Thread):
 
 
 if __name__ == "__main__":
+    print("loading model...")
+    # 分割网络
     SegModel = ENet(num_classes=3).to(DEVICE)
     checkpoint = torch.load('./save/nfs_enet', map_location=torch.device(DEVICE))
     SegModel.load_state_dict(checkpoint['state_dict'])
-
+    # 分类网络
     ClassModel = torch.load("./save/drive.pth", map_location=torch.device(DEVICE))
-
+    print('model loaded!')
+    # 按键线程
     KThread = KeyThread()
-
-    # k = PyKeyboard()
 
     # press b to start
     while True:
@@ -161,10 +163,11 @@ if __name__ == "__main__":
             # 更改当前按键
             KThread.ChangeKey(press)
             current = press
+        # 按e结束
         if is_pressed('e'):
             print('end')
             KThread.Stop()
             break
-
+        # 一个循环用时
         print("time", time.time() - st)
 
