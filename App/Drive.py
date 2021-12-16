@@ -105,13 +105,16 @@ class KeyThread(Thread):
             if self.ScanCode:
                 for c in self.ScanCode:
                     k.key_down(c)
-                    time.sleep(0.0001)
+                    # print("press", c)
+                    # time.sleep(0.0001)
 
     def ChangeKey(self, key):
         """
         :param key: the list of the pressing key, e.g. 'WA'
         :return: None
         """
+        for _k in self.ScanCode:
+            k.key_up(_k)
         self.ScanCode = []
         for _k in key:
             self.ScanCode.append(self.CodeDic[_k])
@@ -149,8 +152,10 @@ if __name__ == "__main__":
     # press E to stop
     current = ''
     while True:
-        st = time.time()
-        img = pyautogui.screenshot(region=[0, 0, 640, 480])  # x,y,w,h
+        # st = time.time()
+        # img = pyautogui.screenshot(region=[0, 0, 640, 480])  # x,y,w,h
+        img = Image.open()
+        # img.save('./temp.png')
         # Seg
         img = alter_predict(SegModel, img, DEVICE)
         # 归一化
@@ -158,6 +163,8 @@ if __name__ == "__main__":
         # class
         pred = tensor_predict(ClassModel, img, DEVICE)
         press = Dict[pred.item()]
+
+        print(press)
 
         if press != current:
             # 更改当前按键
@@ -169,4 +176,4 @@ if __name__ == "__main__":
             KThread.Stop()
             break
         # 一个循环用时
-        print("time", time.time() - st)
+        # print("time", time.time() - st)

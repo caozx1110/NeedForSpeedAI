@@ -33,7 +33,8 @@ if __name__ == '__main__':
     model = ENet(num_classes=3).to(DEVICE)
     checkpoint = torch.load('./save/nfs_enet', map_location=torch.device(DEVICE))
     model.load_state_dict(checkpoint['state_dict'])
-    test_img = Image.open('../Data/nfs/test/A9.png')
+    ClassModel = torch.load("./save/drive.pth", map_location=torch.device(DEVICE))
+    test_img = Image.open('./temp.png')
 
     st = time.time()
     pre = alter_predict(model, test_img, DEVICE)
