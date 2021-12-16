@@ -1,12 +1,3 @@
-import os
-import torch
-import torch.nn as nn
-from PIL import Image
-import torch.optim as optim
-from torch.utils.data import DataLoader
-import torchvision.transforms as transforms
-import torch.optim.lr_scheduler as lr_scheduler
-
 import utils
 from test import Test
 from train import Train
@@ -15,6 +6,15 @@ from models.enet import ENet
 from args import get_arguments
 import transforms as ext_transforms
 from data.utils import enet_weighing
+
+import os
+import torch
+import torch.nn as nn
+from PIL import Image
+import torch.optim as optim
+from torch.utils.data import DataLoader
+import torchvision.transforms as transforms
+import torch.optim.lr_scheduler as lr_scheduler
 
 
 args = get_arguments()
@@ -55,7 +55,7 @@ def load_dataset(dataset):
 
     # step 2
     train_set = dataset(args.dataset_dir, transform=train_trans,
-                        label_transform=label_trans)
+                        label_transform=label_trans, augment_intensity=.6)
     train_loader = DataLoader(train_set, batch_size=args.batch_size,
                               shuffle=True, num_workers=args.workers)
     val_set = dataset(args.dataset_dir, mode='val', transform=test_trans,

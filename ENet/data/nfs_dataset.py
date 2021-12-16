@@ -105,14 +105,20 @@ class nfs_seg_dataset(Dataset):
 
         """
         if random.random() > self.augment_intensity:
+            print(1)
             angle = random.randint(-30, 30)
             img = F.rotate(img, angle)
             lbl = F.rotate(lbl, angle)
+            print(lbl.shape, type(lbl))
         if random.random() > self.augment_intensity:
+            print(2)
             img = F.hflip(img)
             lbl = F.hflip(lbl)
+            print(lbl.shape, type(lbl))
         if random.random() > self.augment_intensity:
+            print(3)
             img = F.vflip(img)
             lbl = F.vflip(lbl)
+            print(lbl.shape, type(lbl))
         return img, lbl
 
