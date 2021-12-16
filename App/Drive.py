@@ -176,9 +176,4 @@ if __name__ == "__main__":
             KThread.Stop()
             break
         # 一个循环用时
-<<<<<<< HEAD
-        # print("time", time.time() - st)
-=======
         print("time", time.time() - st)
-
->>>>>>> bbe622efc9eb2f5c28730738b679a25141fa8093
