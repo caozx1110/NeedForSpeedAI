@@ -1,4 +1,5 @@
 import os
+import random
 import time
 
 from PIL import Image
@@ -36,12 +37,14 @@ if __name__ == '__main__':
     ClassModel = torch.load("./save/drive.pth", map_location=torch.device(DEVICE))
     """"""
     import matplotlib.image
-    folder = 'C:/Users/q7423/Desktop/czx2/'
-    for f in os.listdir(folder):
+    folder = '../Data/Collect/data_raw/lph1/'
+    list_dir = os.listdir(folder)
+    random.shuffle(list_dir)
+    for f in list_dir:
         img = Image.open(os.path.join(folder, f))
         pre = alter_predict(model, img, DEVICE)
         render = pre2render(pre, class_encoding)
-        matplotlib.image.imsave(os.path.join('C:/Users/q7423/Desktop/czx2_ann2/', f), render)
+        matplotlib.image.imsave(os.path.join('../Data/drive/', f), render)
         time.sleep(0.5)
     """"""
     # test_img = Image.open('./temp.png')
