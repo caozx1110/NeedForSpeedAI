@@ -36,15 +36,14 @@ if __name__ == '__main__':
     model.load_state_dict(checkpoint['state_dict'])
     ClassModel = torch.load("./save/drive.pth", map_location=torch.device(DEVICE))
     """"""
-    import matplotlib.image
     folder = '../Data/Collect/data_raw/lph1/'
     list_dir = os.listdir(folder)
     random.shuffle(list_dir)
     for f in list_dir:
         img = Image.open(os.path.join(folder, f))
         pre = alter_predict(model, img, DEVICE)
-        render = pre2render(pre, class_encoding)
-        matplotlib.image.imsave(os.path.join('../Data/drive/', f), render)
+        pil_img = Image.fromarray(pre.numpy())
+        pil_img.save(os.path.join('../Data/drive/', f))
         time.sleep(0.5)
     """"""
     # test_img = Image.open('./temp.png')
