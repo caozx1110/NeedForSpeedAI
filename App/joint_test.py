@@ -31,16 +31,26 @@ class_encoding = OrderedDict([
 
 if __name__ == '__main__':
     model = ENet(num_classes=3).to(DEVICE)
-    checkpoint = torch.load('./save/nfs_enet', map_location=torch.device(DEVICE))
+    checkpoint = torch.load('./save/aug0/nfs_enet', map_location=torch.device(DEVICE))
     model.load_state_dict(checkpoint['state_dict'])
     ClassModel = torch.load("./save/drive.pth", map_location=torch.device(DEVICE))
-    test_img = Image.open('./temp.png')
-
-    st = time.time()
-    pre = alter_predict(model, test_img, DEVICE)
-    print('seg', time.time() - st)
-
-    render = pre2render(pre, class_encoding)
-
-    plt.imshow(render)
-    plt.show()
+    """"""
+    import matplotlib.image
+    folder = 'C:/Users/q7423/Desktop/czx2/'
+    for f in os.listdir(folder):
+        img = Image.open(os.path.join(folder, f))
+        pre = alter_predict(model, img, DEVICE)
+        render = pre2render(pre, class_encoding)
+        matplotlib.image.imsave(os.path.join('C:/Users/q7423/Desktop/czx2_ann2/', f), render)
+        time.sleep(0.5)
+    """"""
+    # test_img = Image.open('./temp.png')
+    #
+    # st = time.time()
+    # pre = alter_predict(model, test_img, DEVICE)
+    # print('seg', time.time() - st)
+    #
+    # render = pre2render(pre, class_encoding)
+    #
+    # plt.imshow(render)
+    # plt.show()
