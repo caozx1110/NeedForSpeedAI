@@ -84,7 +84,7 @@ class DriveNet(nn.Module):
         )
 
         self.fc = nn.Sequential(
-            nn.Linear(32 * 3 * 4, 5),
+            nn.Linear(32 * 3 * 4, 6),
             # nn.ReLU(True),
             # nn.Linear(512, 5),
         )
