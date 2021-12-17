@@ -29,7 +29,7 @@ class nfs_cls_dataset(Dataset):
         self.transform = input_trans
         self.data = []
         self.label = []
-        for i in range(os.listdir(self.data_path)):
+        for i in range(len(os.listdir(self.data_path))):
             lbl_name = os.listdir(self.data_path)[i]
             key = re.findall(r'[a-zA-Z]+', lbl_name)[0]
             abs_lbl_path = os.path.join(self.data_path, lbl_name)
