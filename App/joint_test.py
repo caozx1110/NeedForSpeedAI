@@ -32,21 +32,32 @@ class_encoding = OrderedDict([
 ])
 
 
-if __name__ == '__main__':
+def main():
     model = ENet(num_classes=3).to(DEVICE)
-    checkpoint = torch.load('./save/aug0/nfs_enet', map_location=torch.device(DEVICE))
+    checkpoint = torch.load('./save/aug2/nfs_enet', map_location=torch.device(DEVICE))
     model.load_state_dict(checkpoint['state_dict'])
     ClassModel = torch.load("./save/drive.pth", map_location=torch.device(DEVICE))
     """"""
+    print("start ann...")
     folder = '../Data/Collect/data_raw/lph2/'
     list_dir = os.listdir(folder)
     random.shuffle(list_dir)
-    for f in list_dir:
+    print(len(list_dir))
+    for i, f in enumerate(list_dir):
+        print(i)
         img = Image.open(os.path.join(folder, f))
         pre = alter_predict(model, img, DEVICE)
         pil_img = torchvision.transforms.functional.to_pil_image(pre.type(torch.uint8))
-        pil_img.save(os.path.join('../Data/drive/', f))
+        if i <= 0.85 * len(list_dir):
+            path = os.path.join('../Data/drive/train_ann', f)
+        elif 0.85 * len(list_dir) < i < 0.95 * len(list_dir):
+            path = os.path.join('../Data/drive/test_ann', f)
+        else:
+            path = os.path.join('../Data/drive/val_ann', f)
+
+        pil_img.save(path)
         # time.sleep(0.5)
+    print("over")
     """"""
     # test_img = Image.open('./temp.png')
     #
@@ -58,3 +69,7 @@ if __name__ == '__main__':
     #
     # plt.imshow(render)
     # plt.show()
+
+
+if __name__ == '__main__':
+    main()
