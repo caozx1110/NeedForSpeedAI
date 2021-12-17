@@ -82,7 +82,7 @@ class nfs_seg_dataset(Dataset):
                                "Supported modes are: train, val and test")
 
         img, label = self.loader(data_path, label_path)
-        if self.mode == 'train':
+        if self.mode == 'train' and self.dual_trans is not None:
             # img, label = self.dual_augment(img, label)
             seed = np.random.randint(2147483647)
             torch.manual_seed(seed)
