@@ -38,7 +38,7 @@ if __name__ == '__main__':
     model.load_state_dict(checkpoint['state_dict'])
     ClassModel = torch.load("./save/drive.pth", map_location=torch.device(DEVICE))
     """"""
-    folder = '../Data/Collect/data_raw/lph1/'
+    folder = '../Data/Collect/data_raw/lph2/'
     list_dir = os.listdir(folder)
     random.shuffle(list_dir)
     for f in list_dir:
