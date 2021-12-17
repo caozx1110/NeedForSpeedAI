@@ -37,27 +37,25 @@ def load_dataset(dataset):
 
     # step 1
     train_trans = transforms.Compose([
-        transforms.RandomApply(
-            nn.ModuleList([
-                transforms.ColorJitter(brightness=.5, contrast=.5, saturation=.5, hue=.3),
-                transforms.RandomInvert()
-            ]),
-            p=.5
-        ),
+        transforms.ColorJitter(brightness=.5, contrast=.5, saturation=.5, hue=.3),
+        transforms.RandomEqualize(),
         transforms.ToTensor(),
     ])
 
-    test_trans = transforms.Compose([
-        transforms.ToTensor(),
-    ])
+    test_trans = transforms.ToTensor()
     label_trans = transforms.Compose([
         ext_transforms.PILToLongTensor(),
     ])
     dual_trans = transforms.Compose([
-        transforms.RandomResizedCrop(size=(480, 640)),
+        transforms.RandomApply(
+            nn.ModuleList([
+                transforms.RandomResizedCrop(size=(480, 640)),
+                transforms.RandomRotation(30)
+            ]), p=.5
+        ),
         transforms.RandomHorizontalFlip(),
-        transforms.RandomVerticalFlip(),
     ])
+    print(dual_trans)
 
     # step 2
     train_set = dataset(args.dataset_dir, transform=train_trans,
