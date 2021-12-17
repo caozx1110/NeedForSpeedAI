@@ -2,6 +2,8 @@ import os
 import random
 import time
 
+import numpy as np
+import torchvision.transforms.functional
 from PIL import Image
 import sys
 from torch import optim
@@ -42,9 +44,9 @@ if __name__ == '__main__':
     for f in list_dir:
         img = Image.open(os.path.join(folder, f))
         pre = alter_predict(model, img, DEVICE)
-        pil_img = Image.fromarray(pre.numpy())
+        pil_img = torchvision.transforms.functional.to_pil_image(pre.type(torch.uint8))
         pil_img.save(os.path.join('../Data/drive/', f))
-        time.sleep(0.5)
+        # time.sleep(0.5)
     """"""
     # test_img = Image.open('./temp.png')
     #
