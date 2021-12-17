@@ -5,17 +5,18 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 
-def extract_data(root, img_folder='', label_folder=''):
+def extract_data(root, img_folder, label_folder):
     root_list = os.listdir(root)
     for item in root_list:
+        last = '_' + item[-1]
         json_list = os.path.join(root, item)
-        name = item[: len(item) - 5]
+        name = item[: len(item) - 7]
         img_path = os.path.join(json_list, 'img.png')
         label_path = os.path.join(json_list, 'label.png')
         img = Image.open(img_path)
         label = Image.open(label_path)
-        img.save(os.path.join(img_folder, name + '.png'))
-        label.save(os.path.join(label_folder, name + '.png'))
+        img.save(os.path.join(img_folder, name + last + '.png'))
+        label.save(os.path.join(label_folder, name + last + '.png'))
 
 
 def split_dataset(root, train_path, test_path, val_path, test_ratio, val_ratio):
@@ -54,7 +55,7 @@ def split_dataset(root, train_path, test_path, val_path, test_ratio, val_ratio):
 
 extract_data('dataset', img_folder='root', label_folder='root_ann')
 
-split_dataset('root', 'nfs/train', 'nfs/test', 'nfs/val', .15, .15)
+split_dataset('root', 'nfs/train', 'nfs/test', 'nfs/val', .05, .1)
 
 
 img = Image.open('nfs/train_ann/A1.png')

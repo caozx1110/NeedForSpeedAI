@@ -10,27 +10,31 @@ class PILToLongTensor:
     Convert a ``PIL Image`` to a ``torch.LongTensor``.
     """
 
-    def __call__(self, img):
+    def __call__(self, pic):
         """
         Perform the conversion from a ``PIL Image`` to a ``torch.LongTensor``.
-        Return a ``LongTensor`` object.
+        Keyword arguments:
+        - pic (``PIL.Image``): the image to convert to ``torch.LongTensor``
+        Returns:
+        A ``torch.LongTensor``.
+
         """
-        if not isinstance(img, Image.Image):
+        if not isinstance(pic, Image.Image):
             raise TypeError("pic should be PIL Image. Got {}".format(
-                type(img)))
+                type(pic)))
 
         # handle numpy array
-        if isinstance(img, np.ndarray):
-            img = torch.from_numpy(img.transpose((2, 0, 1)))
+        if isinstance(pic, np.ndarray):
+            img = torch.from_numpy(pic.transpose((2, 0, 1)))
             # backward compatibility
             return img.long()
 
         # Convert PIL image to ByteTensor
-        img = torch.ByteTensor(torch.ByteStorage.from_buffer(img.tobytes()))
+        img = torch.ByteTensor(torch.ByteStorage.from_buffer(pic.tobytes()))
 
         # Reshape tensor
-        chn = len(img.mode)
-        img = img.view(img.size[1], img.size[0], chn)
+        chn = len(pic.mode)
+        img = img.view(pic.size[1], pic.size[0], chn)
 
         # Convert to long and squeeze the channels
         return img.transpose(0, 1).transpose(0, 2).contiguous().long().squeeze_()
@@ -56,9 +60,11 @@ class LongTensorToRGBPIL(object):
         if not isinstance(self.rgb_encoding, OrderedDict):
             raise TypeError("encoding should be an OrderedDict. Got {}".format(type(self.rgb_encoding)))
 
-        # label_tensor might be an image without a channel dimension, in this case unsqueeze it
+        # label_tensor might be an image without a channel dimension, in this
+        # case unsqueeze it
         if len(tensor.size()) == 2:
             tensor.unsqueeze_(0)
+
         color_tensor = torch.ByteTensor(3, tensor.size(1), tensor.size(2))
 
         for index, (class_name, color) in enumerate(self.rgb_encoding.items()):
@@ -67,4 +73,5 @@ class LongTensorToRGBPIL(object):
             # Fill color_tensor with corresponding colors
             for channel, color_value in enumerate(color):
                 color_tensor[channel].masked_fill_(mask, color_value)
+
         return ToPILImage()(color_tensor)

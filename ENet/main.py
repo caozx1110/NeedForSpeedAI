@@ -1,5 +1,5 @@
 import utils
-from test import Test
+from test_ import Test
 from train import Train
 from metric.iou import IoU
 from models.enet import ENet
@@ -15,7 +15,6 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 import torch.optim.lr_scheduler as lr_scheduler
-
 
 args = get_arguments()
 device = torch.device(args.device)
@@ -38,24 +37,31 @@ def load_dataset(dataset):
 
     # step 1
     train_trans = transforms.Compose([
-        transforms.ColorJitter(brightness=.5, contrast=.5, saturation=.5, hue=.3),
-        transforms.Resize((args.height, args.width)),
+        transforms.RandomApply(
+            nn.ModuleList([
+                transforms.ColorJitter(brightness=.5, contrast=.5, saturation=.5, hue=.3),
+                transforms.RandomInvert()
+            ]),
+            p=.5
+        ),
         transforms.ToTensor(),
     ])
 
     test_trans = transforms.Compose([
-        transforms.Resize((args.height, args.width)),
         transforms.ToTensor(),
     ])
-
     label_trans = transforms.Compose([
-        transforms.Resize((args.height, args.width), Image.NEAREST),
         ext_transforms.PILToLongTensor(),
+    ])
+    dual_trans = transforms.Compose([
+        transforms.RandomResizedCrop(size=(480, 640)),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomVerticalFlip(),
     ])
 
     # step 2
     train_set = dataset(args.dataset_dir, transform=train_trans,
-                        label_transform=label_trans, augment_intensity=.6)
+                        label_transform=label_trans, dual_trans=dual_trans)
     train_loader = DataLoader(train_set, batch_size=args.batch_size,
                               shuffle=True, num_workers=args.workers)
     val_set = dataset(args.dataset_dir, mode='val', transform=test_trans,
@@ -278,3 +284,37 @@ if __name__ == '__main__':
         test(model, test_loader, w_class, class_encoding)
 
 
+# train_trans = transforms.Compose([
+#     transforms.RandomApply(
+#         nn.ModuleList([
+#             transforms.ColorJitter(brightness=.5, contrast=.5, saturation=.5, hue=.3),
+#             transforms.RandomInvert()
+#         ]),
+#         p=.5
+#     ),
+#     transforms.ToTensor(),
+# ])
+#
+# test_trans = transforms.Compose([
+#     transforms.ToTensor(),
+# ])
+# label_trans = transforms.Compose([
+#     ext_transforms.PILToLongTensor(),
+# ])
+# dual_trans = transforms.Compose([
+#     transforms.RandomResizedCrop(size=(480, 640)),
+#     transforms.RandomHorizontalFlip(),
+#     transforms.RandomVerticalFlip(),
+# ])
+
+# train_set = nfs_seg_dataset('./data/nfs', transform=train_trans,
+#                             label_transform=label_trans, intensity=0, dual_trans=dual_trans)
+# i = 0
+# i += 1
+# plt.close()
+# img, lbl = train_set.__getitem__(i)
+# lbl = ext_transforms.LongTensorToRGBPIL(nfs_seg_dataset.color_encoding)(lbl)
+# plt.subplot(121)
+# plt.imshow(lbl)
+# plt.subplot(122)
+# plt.imshow(img.transpose(0, 1).transpose(1, 2).numpy())

@@ -1,6 +1,9 @@
 import os
 import random
+import numpy as np
 from collections import OrderedDict
+
+import torch
 from torch.utils.data import Dataset
 import torchvision.transforms.functional as F
 
@@ -28,15 +31,16 @@ class nfs_seg_dataset(Dataset):
         ('car', (64, 0, 128)),
     ])
 
-    def __init__(self, root_dir, mode='train', transform=None, label_transform=None,
-                 loader=utils.pil_loader, augment_intensity=.5):
+    def __init__(self, root_dir, mode='train', transform=None,
+                 label_transform=None, intensity=.5, loader=utils.pil_loader, dual_trans=None):
         super(nfs_seg_dataset, self).__init__()
         self.root_dir = root_dir
         self.mode = mode
         self.transform = transform
         self.label_transform = label_transform
+        self.intensity = intensity
         self.loader = loader
-        self.augment_intensity = augment_intensity
+        self.dual_trans = dual_trans
 
         if self.mode.lower() == 'train':
             self.train_data = utils.get_files(
@@ -78,12 +82,17 @@ class nfs_seg_dataset(Dataset):
                                "Supported modes are: train, val and test")
 
         img, label = self.loader(data_path, label_path)
+        if self.mode == 'train':
+            # img, label = self.dual_augment(img, label)
+            seed = np.random.randint(2147483647)
+            torch.manual_seed(seed)
+            img = self.dual_trans(img)
+            torch.manual_seed(seed)
+            label = self.dual_trans(label)
         if self.transform is not None:
             img = self.transform(img)
         if self.label_transform is not None:
             label = self.label_transform(label)
-        if self.mode == 'train':
-            img, label = self.data_augmentation(img, label)
         return img, label
 
     def __len__(self):
@@ -98,27 +107,15 @@ class nfs_seg_dataset(Dataset):
             raise RuntimeError("Unexpected dataset mode. "
                                "Supported modes are: train, val and test")
 
-    def data_augmentation(self, img, lbl):
-        """
-        Randomly perform data augmentation:
-            Rotate:
-
-        """
-        if random.random() > self.augment_intensity:
-            print(1)
-            angle = random.randint(-30, 30)
+    def dual_augment(self, img, lbl):
+        if random.random() > self.intensity:
+            angle = random.randint(-45, 45)
             img = F.rotate(img, angle)
             lbl = F.rotate(lbl, angle)
-            print(lbl.shape, type(lbl))
-        if random.random() > self.augment_intensity:
-            print(2)
+        if random.random() > self.intensity:
             img = F.hflip(img)
             lbl = F.hflip(lbl)
-            print(lbl.shape, type(lbl))
-        if random.random() > self.augment_intensity:
-            print(3)
+        if random.random() > self.intensity:
             img = F.vflip(img)
             lbl = F.vflip(lbl)
-            print(lbl.shape, type(lbl))
         return img, lbl
-
