@@ -56,11 +56,12 @@ import pyautogui
 
 
 if __name__ == '__main__':
-    folder = './data_raw/lph1/'
+    folder = './data_raw/lph2/'
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-    Dic = {'W': 0, 'A': 0, 'S': 0, 'D': 0, 'WA': 0, 'WD': 0, 'AS': 0, 'SD': 0, 'N': 0}
+    # Dic = {'W': 0, 'A': 0, 'S': 0, 'D': 0, 'WA': 0, 'WD': 0, 'AS': 0, 'SD': 0, 'N': 0}
+    Dic = {'W': 869, 'A': 84, 'S': 0, 'D': 34, 'WA': 120, 'WD': 134, 'AS': 0, 'SD': 0, 'N': 0}
     # bt = time.time()
     # print("begin", bt)
     while True:
