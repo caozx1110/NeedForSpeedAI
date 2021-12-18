@@ -29,8 +29,11 @@ class nfs_cls_dataset(Dataset):
         self.transform = input_trans
         self.data = []
         self.label = []
-        for i in range(len(os.listdir(self.data_path))):
-            lbl_name = os.listdir(self.data_path)[i]
+        list_dir = os.listdir(self.data_path)
+        print("len", len(list_dir))
+        for i in range(len(list_dir)):
+            # print("loaded", i)
+            lbl_name = list_dir[i]
             key = re.findall(r'[a-zA-Z]+', lbl_name)[0]
             abs_lbl_path = os.path.join(self.data_path, lbl_name)
             img = np.array(Image.open(abs_lbl_path)) / 2
