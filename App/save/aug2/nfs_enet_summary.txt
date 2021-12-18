@@ -1,0 +1,25 @@
+ARGUMENTS
+batch_size: 8
+dataset: nfs
+dataset_dir: data/nfs
+device: cuda
+epochs: 300
+height: 480
+ignore_unlabeled: False
+imshow_batch: False
+learning_rate: 0.0005
+lr_decay: 0.1
+lr_decay_epochs: 100
+mode: train
+name: nfs_enet
+print_loss: False
+resume: True
+save_dir: save
+weighing: ENet
+weight_decay: 0.0002
+width: 640
+workers: 4
+
+BEST VALIDATION
+Epoch: 280
+Mean IoU: 0.9097267160536816
