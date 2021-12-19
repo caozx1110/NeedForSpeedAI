@@ -114,10 +114,14 @@ class KeyThread(Thread):
 
             if self.ScanCode:
                 for c in self.ScanCode:
-                    k.key_press(c, 0.01)
+                    if c == self.CodeDic['W']:
+                        if random.random() > 0.2:
+                            k.key_press(c, 0.005)
+                    else:
+                        k.key_press(c, 0.005)
                     # k.key_down(c)
                     # # print("press", c)
-                    # time.sleep(0.0001)
+                # time.sleep(0.001)
                 # time.sleep(0.001)
 
     def ChangeKey(self, key):
