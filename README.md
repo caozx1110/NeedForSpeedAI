@@ -6,38 +6,9 @@ the AI to drive the car in the game Need For Speed
 ### 文件结构
 
 ├─App	模型应用
-│  ├─save	模型存储
 ├─Data	获取数据以及数据集制作
-│  ├─Collect	获取数据脚本
-│  │  ├─dataset	制作的数据集
-│  │  │  ├─dataset_czx
-│  │  │  ├─dataset_mcl
-│  │  │  └─dataset_xyx
-│  │  ├─data_raw	原始截图文件
-│  │  │  ├─czx1
-│  │  │  ├─mcl1
-│  │  │  │  └─data	分割的json文件
-│  │  │  └─xyx1
-│  │  │      └─data	分割的json文件
-│  ├─dataset	副本
-│  ├─nfs	制作好的数据集
-│  │  ├─test	测试集原图
-│  │  ├─test_ann	测试集分割结果
-│  │  ├─train	训练集原图
-│  │  ├─train_ann	训练集分割结果
-│  │  ├─val	验证集原图
-│  │  └─val_ann	验证集分割结果
-│  ├─root	临时
-│  └─root_ann	临时
 ├─DriveNet	网络训练
-│  └─save	保存的模型
 └─ENet	网络训练
-    ├─data	
-    ├─metric
-    ├─models
-    └─save
-        ├─ENet_CamVid
-        └─ENet_Cityscapes
 
 ---
 

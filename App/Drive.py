@@ -19,18 +19,12 @@ from PIL import Image
 from torchvision import transforms as F
 from threading import Thread
 from export import *
-from joint_test import *
+from ModelTest import *
 from keyboard import *
 import KeyboardEmulation as k
 
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-class_encoding = OrderedDict([
-    ('unlabeled', (0, 0, 0)),
-    ('road', (255, 0, 0)),
-    ('car', (0, 255, 0)),
-])
 
 # label to key dict
 # Dict = {
@@ -181,9 +175,6 @@ if __name__ == "__main__":
         # Seg
         # img = Image.open('./temp.png')
         img = alter_predict(SegModel, img, DEVICE)
-        # render = pre2render(img, class_encoding)
-        # plt.imshow(render)
-        # plt.show()
         # 归一化
         img = img / 2
         # class
