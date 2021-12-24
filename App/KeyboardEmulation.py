@@ -4,7 +4,7 @@
 @project: PreTest
 @file: KeyboardEmulation.py
 @date: 2021/12/10
-@function: 
+@function: 进一步封装pywinio库，生成按下、松开等函数
 """
 
 import pywinio

@@ -1,16 +1,15 @@
+"""
+@function: 1. 对ENet模型进行测试; 2. 使用ENet模型进行DriveNet的数据集生成
+"""
 import os
 import random
 import time
-
-import numpy as np
 import torchvision.transforms.functional
 from PIL import Image
-import sys
-from torch import optim
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 from export import *
-from enet import ENet
+from ENet import ENet
 
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -60,7 +59,7 @@ def rawdata2dataset():
             path = os.path.join('../Data/drive/val_ann', f)
 
         pil_img.save(path)
-        # if you run this in CPU, you'd better add time.sleep, otherwise your CPU may burn (lol
+        # TODO: if you run this in CPU, you'd better add time.sleep, otherwise your CPU may burn (lol
         # time.sleep(0.5)
     print("over")
     """"""

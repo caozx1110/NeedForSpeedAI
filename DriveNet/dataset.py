@@ -1,13 +1,13 @@
+"""
+@function: 分类网络所需dataset类
+"""
 import os
 import re
 import numpy as np
-import torch
 from PIL import Image
 from torch.utils.data import Dataset
 
-
 label_dict = {'A': 0, 'D': 1, 'N': 2, 'W': 3, 'WA': 4, 'WD': 5}
-
 
 class nfs_cls_dataset(Dataset):
     """ Used for creating classification data loader """
@@ -26,11 +26,14 @@ class nfs_cls_dataset(Dataset):
             self.data_path = os.path.join(data_path, self.test_label_folder)
         else:
             self.data_path = os.path.join(data_path, self.val_label_folder)
+
         self.transform = input_trans
         self.data = []
         self.label = []
+        # 一次访问文件夹并记录
         list_dir = os.listdir(self.data_path)
         print("len", len(list_dir))
+        # 将数据集读入内存，以减少训练时取图片的时间
         for i in range(len(list_dir)):
             # print("loaded", i)
             lbl_name = list_dir[i]

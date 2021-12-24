@@ -4,7 +4,7 @@
 @project: Drive
 @file: ChangeLabel.py
 @date: 2021/12/14
-@function: label 1 -> road, label 2 -> car
+@function: 更改labelme中未命名的label label 1 -> road, label 2 -> car
 """
 
 import os
@@ -27,23 +27,3 @@ if __name__ == '__main__':
         with open(path, "w", encoding='utf-8') as f:
             f.write(s)
             f.close()
-
-
-import matplotlib.pyplot as plt
-from PIL import Image
-root = 'dataset\\dataset_mcl'
-json_list = os.listdir(root)
-i = 0
-i += 1
-plt.close()
-path = os.path.join(root, json_list[i])
-print(json_list[i])
-img_path = os.path.join(path, 'img.png')
-lbl_path = os.path.join(path, 'label_viz.png')
-plt.subplot(121)
-plt.imshow(Image.open(img_path))
-plt.axis('off')
-plt.subplot(122)
-plt.imshow(Image.open(lbl_path))
-plt.axis('off')
-
