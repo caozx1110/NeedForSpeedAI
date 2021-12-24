@@ -10,7 +10,6 @@ from data.utils import enet_weighing
 import os
 import torch
 import torch.nn as nn
-from PIL import Image
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
