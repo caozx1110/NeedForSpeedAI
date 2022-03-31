@@ -72,7 +72,7 @@ if __name__ == '__main__':
     ClassModel = torch.load("./save/drive.pth", map_location=torch.device(DEVICE))
 
     # test img file name
-    test_img = Image.open('./temp.png')
+    test_img = Image.open('../Data/Collect/data_raw/lph2/W1614.jpg')
     
     st = time.time()
     pre = alter_predict(model, test_img, DEVICE)
@@ -80,4 +80,6 @@ if __name__ == '__main__':
     
     render = pre2render(pre, class_encoding)
     plt.imshow(render)
+    import matplotlib
+    matplotlib.image.imsave('1.png', render)
     plt.show()
