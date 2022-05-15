@@ -47,4 +47,4 @@ the AI to drive the car in the game Need For Speed
 
 ### 效果展示
 
-![gif](https://j.gifs.com/gpKzqr.gif)
+<img src="https://j.gifs.com/gpKzqr.gif" />
