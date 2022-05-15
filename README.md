@@ -43,3 +43,8 @@ the AI to drive the car in the game Need For Speed
 
 ​		用于对同一归属目录下的文件夹统一重命名，在其后加上**_[数字]**，具体数字需编辑更改，慎用
 
+---
+
+### 效果展示
+
+<iframe src='//gifs.com/embed/20s-gpKzqr' frameborder='0' scrolling='no' width='640px' height='368px' style='-webkit-backface-visibility: hidden;-webkit-transform: scale(1);' ></iframe>
